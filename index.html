@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ORBITX — Premium Space Exploration &amp; Astrophysical Platform</title>
+  <meta name="description" content="Explore ORBITX's solar system, planetary science, Mars missions, deep-space discoveries and mission archive.">
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23070B18'/><circle cx='50' cy='50' r='20' fill='%2338BDF8'/><circle cx='68' cy='40' r='6' fill='%238B5CF6'/></svg>">
+
+  <!-- FontAwesome Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <!-- Core Design System & Component Styles -->
+  <link rel="stylesheet" href="css/orbitx-theme.css">
+  <link rel="stylesheet" href="css/solar-system.css">
+  <link rel="stylesheet" href="css/planet-explorer.css">
+  <link rel="stylesheet" href="css/nasa-apod.css">
+  <link rel="stylesheet" href="css/mars-mission.css">
+  <link rel="stylesheet" href="css/deep-space.css">
+  <link rel="stylesheet" href="css/mission-control.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div class="orbitx-scroll-progress" id="orbitx-scroll-progress" aria-hidden="true"></div>
+
+  <!-- Background Canvas: Multi-layer Twinkling Starfield & Shooting Stars -->
+  <canvas id="starfield-canvas"></canvas>
+
+  <!-- Ambient Cosmic Nebula Glows -->
+  <div class="nebula-glow-1"></div>
+  <div class="nebula-glow-2"></div>
+
+  <!-- Global Header HUD -->
+  <header class="orbitx-header">
+    <div class="app-container nav-container">
+      <!-- Brand Logo -->
+      <a href="#hero" class="brand-logo">
+        <div class="brand-symbol">
+          <div class="brand-ring"></div>
+          <div class="brand-core"></div>
+        </div>
+        <span>ORBITX</span>
+      </a>
+
+      <!-- Navigation Menu -->
+      <ul class="nav-menu" id="nav-menu">
+        <li><a href="#hero" class="nav-link active">Overview</a></li>
+        <li><a href="#solar-system" class="nav-link">Solar System</a></li>
+        <li><a href="#section-planet-explorer" class="nav-link">Planet Explorer</a></li>
+        <li><a href="#section-mars-mission" class="nav-link">Mars Mission</a></li>
+        <li><a href="#section-deep-space" class="nav-link">Deep Space</a></li>
+        <li><a href="#section-mission-control" class="nav-link">Mission Control</a></li>
+        <li><a href="#section-nasa-data" class="nav-link">NASA APOD</a></li>
+      </ul>
+
+      <!-- HUD Telemetry Status -->
+      <div class="nav-hud-status">
+        <div class="hud-pill">
+          <div class="hud-pill-dot"></div>
+          <span>TELEMETRY ONLINE</span>
+        </div>
+        <div class="hud-pill">
+          <i class="fa-regular fa-clock" style="color: var(--accent-cyan);"></i>
+          <span id="hud-utc-clock">00:00:00 UTC</span>
+        </div>
+      </div>
+
+      <!-- Mobile Hamburger Toggle -->
+      <button class="menu-toggle" id="menu-toggle" aria-label="Toggle navigation menu">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content Shell -->
+  <main id="main-content">
+    <!-- HERO SECTION -->
+    <section class="hero-section" id="hero">
+      <div class="app-container hero-grid">
+        <!-- Hero Left Column: Copy & Actions -->
+        <div class="hero-content">
+          <div class="hero-badge">
+            <i class="fa-solid fa-satellite"></i>
+            <span>MISSION PROTOCOL // DEEP SPACE EXPEDITION</span>
+          </div>
+
+          <h1 class="hero-title">
+            EXPLORE THE COSMOS
+            <span class="gradient-text">BEYOND HORIZONS</span>
+          </h1>
+
+          <p class="hero-desc">
+            A premium astrophysical exploration platform integrating accurate planetary kinematics, NASA scientific observation records, robotic missions, and deep-space discoveries.
+          </p>
+
+          <div class="hero-actions">
+            <a href="#solar-system" class="btn btn-primary">
+              <i class="fa-solid fa-atom"></i>
+              <span>Launch Solar System</span>
+            </a>
+          </div>
+
+          <!-- Quick Metrics Bar -->
+          <div class="hero-stats-row">
+            <div class="stat-item">
+              <span class="stat-value">8</span>
+              <span class="stat-label">Major Planets</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">4.6<small style="font-size: 1rem; color: var(--accent-purple);"> Gyr</small></span>
+              <span class="stat-label">Solar Age</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hero Right Column: 3D Visual Orb & Floating HUD Cards -->
+        <div class="hero-visual">
+          <div class="hero-celestial-orb">
+            <div class="orb-ring"></div>
+            <div class="orb-ring-inner"></div>
+          </div>
+
+          <!-- Floating HUD Tag 1 -->
+          <div class="floating-hud-card hud-card-1">
+            <div class="hud-metric-label">Solar Constant</div>
+            <div class="hud-metric-val">1,361 W/m²</div>
+          </div>
+
+          <!-- Floating HUD Tag 2 -->
+          <div class="floating-hud-card hud-card-2">
+            <div class="hud-metric-label">Earth-Moon Distance</div>
+            <div class="hud-metric-val">384,400 km</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 1: SOLAR SYSTEM EXPLORER -->
+    <section class="section" id="solar-system">
+      <div class="app-container">
+        <!-- Section Header -->
+        <div class="section-header">
+          <div class="section-tag">
+            <i class="fa-solid fa-compass"></i>
+            <span>SECTION 01 // ORBITAL SIMULATION</span>
+          </div>
+          <h2 class="section-title">Solar System Explorer</h2>
+          <p class="section-subtitle">
+            Interactive orbital visualization of the Sun, all eight major planets, and the main asteroid belt. Inspect planetary orbits, relative speeds, and live kinematics.
+          </p>
+        </div>
+
+        <!-- Solar System Stage Container -->
+        <div class="solar-system-wrapper">
+          <!-- Control Bar HUD -->
+          <div class="solar-controls-hud">
+            <!-- Left Controls: Play/Pause, Speed, Reset -->
+            <div class="controls-group-left">
+              <button class="control-pill-btn active" id="solar-btn-play">
+                <i class="fa-solid fa-pause"></i>
+                <span>Pause</span>
+              </button>
+
+              <div class="speed-slider-wrap">
+                <span>Speed:</span>
+                <input type="range" id="solar-speed-slider" class="speed-slider" min="0.1" max="5.0" step="0.1" value="1.0">
+                <span id="solar-speed-val" class="speed-display">1.0x</span>
+              </div>
+
+              <button class="control-pill-btn" id="solar-btn-reset">
+                <i class="fa-solid fa-arrows-to-circle"></i>
+                <span>Reset View</span>
+              </button>
+            </div>
+
+            <!-- Right Controls: Orbits, Labels -->
+            <div class="controls-group-right">
+              <button class="control-pill-btn active" id="solar-btn-orbits">
+                <i class="fa-solid fa-circle-notch"></i>
+                <span>Orbits</span>
+              </button>
+
+              <button class="control-pill-btn active" id="solar-btn-labels">
+                <i class="fa-solid fa-tags"></i>
+                <span>Labels</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Planet Quick Selector Tabs -->
+          <div class="planet-quick-bar">
+            <button class="planet-tab-btn" data-planet="sun">
+              <span class="planet-tab-dot" style="background: #FDB813; box-shadow: 0 0 8px #FDB813;"></span>
+              <span>Sun</span>
+            </button>
+            <button class="planet-tab-btn" data-planet="mercury">
+              <span class="planet-tab-dot" style="background: #A8A29E;"></span>
+              <span>Mercury</span>
+            </button>
+            <button class="planet-tab-btn" data-planet="venus">
+              <span class="planet-tab-dot" style="background: #EAB308;"></span>
+              <span>Venus</span>
+            </button>
+            <button class="planet-tab-btn" data-planet="earth">
+              <span class="planet-tab-dot" style="background: #38BDF8;"></span>
+              <span>Earth</span>
+            </button>
+            <button class="planet-tab-btn" data-planet="mars">
+              <span class="planet-tab-dot" style="background: #EF4444;"></span>
+              <span>Mars</span>
+            </button>
+            <button class="planet-tab-btn" data-planet="jupiter">
+              <span class="planet-tab-dot" style="background: #F97316;"></span>
+              <span>Jupiter</span>
+            </button>
+            <button class="planet-tab-btn" data-planet="saturn">
+              <span class="planet-tab-dot" style="background: #FDE047;"></span>
+              <span>Saturn</span>
+            </button>
+            <button class="planet-tab-btn" data-planet="uranus">
+              <span class="planet-tab-dot" style="background: #22D3EE;"></span>
+              <span>Uranus</span>
+            </button>
+            <button class="planet-tab-btn" data-planet="neptune">
+              <span class="planet-tab-dot" style="background: #3B82F6;"></span>
+              <span>Neptune</span>
+            </button>
+          </div>
+
+          <!-- Interactive Canvas Stage -->
+          <div class="solar-canvas-container">
+            <div class="solar-instructions-badge">
+              <i class="fa-solid fa-hand-pointer"></i>
+              <span>Drag to Pan • Wheel to Zoom • Click Planet to Inspect</span>
+            </div>
+
+            <canvas id="solar-system-canvas"></canvas>
+
+            <!-- Dynamic Planet Hover Tooltip -->
+            <div id="solar-tooltip" class="solar-tooltip"></div>
+
+            <!-- Selected Planet Quick Telemetry Card -->
+            <div id="solar-telemetry" class="solar-telemetry-panel" style="display: none;">
+              <div class="telemetry-card-header">
+                <div class="telemetry-planet-badge">
+                  <div id="solar-telemetry-circle" class="telemetry-planet-circle"></div>
+                  <h3 id="solar-telemetry-name" class="telemetry-planet-name">Planet</h3>
+                </div>
+                <button id="solar-telemetry-close" class="telemetry-close-btn" aria-label="Close card">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+
+              <p id="solar-telemetry-tagline" class="telemetry-tagline">Scientific planetary overview</p>
+
+              <div class="telemetry-grid">
+                <div class="telemetry-box">
+                  <div class="telemetry-label">Distance from Sun</div>
+                  <div id="solar-telemetry-dist" class="telemetry-val">0 AU</div>
+                </div>
+                <div class="telemetry-box">
+                  <div class="telemetry-label">Mean Diameter</div>
+                  <div id="solar-telemetry-diam" class="telemetry-val">0 km</div>
+                </div>
+                <div class="telemetry-box">
+                  <div class="telemetry-label">Orbital Period</div>
+                  <div id="solar-telemetry-period" class="telemetry-val">0 d</div>
+                </div>
+                <div class="telemetry-box">
+                  <div class="telemetry-label">Mean Temp</div>
+                  <div id="solar-telemetry-temp" class="telemetry-val">0 °C</div>
+                </div>
+              </div>
+
+              <button id="solar-telemetry-deepdive" class="btn btn-primary telemetry-deepdive-btn">
+                <span>Deep Dive in Planet Explorer</span>
+                <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: PLANET EXPLORER -->
+    <section class="section" id="section-planet-explorer">
+      <div class="app-container">
+        <!-- Section Header -->
+        <div class="section-header">
+          <div class="section-tag">
+            <i class="fa-solid fa-globe"></i>
+            <span>SECTION 02 // PLANETARY TELEMETRY</span>
+          </div>
+          <h2 class="section-title">Planet Explorer</h2>
+          <p class="section-subtitle">
+            Accurate scientific telemetry verified against NASA Planetary Fact Sheets. Examine surface geology, atmospheric chemistry, physical scales, and comparative astrophysics.
+          </p>
+        </div>
+
+        <div class="planet-explorer-shell">
+          <!-- Planet Selector Strip -->
+          <div class="explorer-nav-strip" id="explorer-nav-strip">
+            <!-- Populated dynamically by planet-explorer.js -->
+          </div>
+
+          <!-- Main Showcase Grid -->
+          <div class="planet-showcase-grid">
+            <!-- Left: 3D Visualizer Sphere Stage -->
+            <div class="planet-visual-column">
+              <div class="planet-sphere-stage">
+                <div class="planet-atmosphere-glow" id="planet-atmosphere-glow"></div>
+                <div class="planet-3d-sphere" id="planet-3d-sphere"></div>
+                <div class="planet-saturn-rings" id="planet-saturn-rings"></div>
+              </div>
+              <div class="planet-category-badge" id="planet-category-badge">
+                <i class="fa-solid fa-atom"></i> Terrestrial Planet
+              </div>
+            </div>
+
+            <!-- Right: Detailed Scientific Information -->
+            <div class="planet-details-column">
+              <div class="planet-title-row">
+                <h3 class="planet-name-heading" id="planet-name-heading">Earth</h3>
+                <span class="planet-order-tag" id="planet-order-tag">PLANET 03</span>
+              </div>
+
+              <div class="planet-tagline-text" id="planet-tagline-text">
+                The vibrant blue oasis of life, liquid oceans and oxygen
+              </div>
+
+              <p class="planet-summary-para" id="planet-summary-para">
+                Earth is the third planet from the Sun and the only astronomical object known to harbor life. Approximately 71% of Earth's surface is covered by liquid water oceans.
+              </p>
+
+              <!-- Scientific Specs Grid -->
+              <div class="planet-specs-grid">
+                <div class="spec-card">
+                  <div class="spec-card-icon"><i class="fa-solid fa-ruler-combined"></i></div>
+                  <div class="spec-card-label">Mean Diameter</div>
+                  <div class="spec-card-value" id="spec-val-diameter">12,742 km</div>
+                  <div class="spec-card-sub" id="spec-sub-diameter">1.0x Earth</div>
+                </div>
+
+                <div class="spec-card">
+                  <div class="spec-card-icon"><i class="fa-solid fa-sun"></i></div>
+                  <div class="spec-card-label">Distance from Sun</div>
+                  <div class="spec-card-value" id="spec-val-distance">1.000 AU</div>
+                  <div class="spec-card-sub" id="spec-sub-distance">149.6M km</div>
+                </div>
+
+                <div class="spec-card">
+                  <div class="spec-card-icon"><i class="fa-solid fa-arrows-spin"></i></div>
+                  <div class="spec-card-label">Orbital Period</div>
+                  <div class="spec-card-value" id="spec-val-period">365.25 d</div>
+                  <div class="spec-card-sub" id="spec-sub-period">1.0 Earth yr</div>
+                </div>
+
+                <div class="spec-card">
+                  <div class="spec-card-icon"><i class="fa-solid fa-temperature-half"></i></div>
+                  <div class="spec-card-label">Surface Temp</div>
+                  <div class="spec-card-value" id="spec-val-temp">15 °C</div>
+                  <div class="spec-card-sub" id="spec-sub-temp">288 Kelvin</div>
+                </div>
+
+                <div class="spec-card">
+                  <div class="spec-card-icon"><i class="fa-solid fa-weight-hanging"></i></div>
+                  <div class="spec-card-label">Surface Gravity</div>
+                  <div class="spec-card-value" id="spec-val-gravity">9.807 m/s²</div>
+                  <div class="spec-card-sub" id="spec-sub-gravity">1.00g baseline</div>
+                </div>
+
+                <div class="spec-card">
+                  <div class="spec-card-icon"><i class="fa-solid fa-moon"></i></div>
+                  <div class="spec-card-label">Confirmed Moons</div>
+                  <div class="spec-card-value" id="spec-val-moons">1</div>
+                  <div class="spec-card-sub" id="spec-sub-moons">Luna</div>
+                </div>
+              </div>
+
+              <!-- Atmospheric Composition Breakdown -->
+              <div class="planet-atmosphere-section">
+                <div class="atmosphere-title">
+                  <i class="fa-solid fa-wind"></i>
+                  <span>Atmospheric Composition</span>
+                </div>
+                <div class="atmosphere-bars-grid" id="atmosphere-bars-grid">
+                  <!-- Populated by planet-explorer.js -->
+                </div>
+              </div>
+
+              <!-- Scientific Key Facts -->
+              <div class="planet-facts-grid" id="planet-facts-grid">
+                <!-- Populated by planet-explorer.js -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Planet Comparison Matrix Tool -->
+          <div class="planet-comparison-panel">
+            <div class="comparison-header">
+              <div>
+                <h4 style="font-family: var(--font-heading); font-size: 1.2rem; color: var(--text-main); margin-bottom: 0.25rem;">
+                  <i class="fa-solid fa-code-compare" style="color: var(--accent-cyan); margin-right: 0.5rem;"></i>
+                  Planetary Comparison Matrix
+                </h4>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">
+                  Compare physical properties, environmental metrics, and orbital velocities side-by-side.
+                </p>
+              </div>
+
+              <div class="comparison-selectors">
+                <select id="compare-select-a" class="compare-select" aria-label="Select first planet"></select>
+                <span style="color: var(--accent-cyan); font-weight: 700;">VS</span>
+                <select id="compare-select-b" class="compare-select" aria-label="Select second planet"></select>
+              </div>
+            </div>
+
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th>Astronomical Metric</th>
+                  <th>Planet A</th>
+                  <th>Planet B</th>
+                </tr>
+              </thead>
+              <tbody id="compare-table-body">
+                <!-- Populated by planet-explorer.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 03: MARS MISSION EXPLORER -->
+    <section class="section mars-section" id="section-mars-mission">
+      <div class="app-container">
+        <div class="section-header">
+          <div class="section-tag">
+            <i class="fa-solid fa-mars"></i>
+            <span>SECTION 03 // PLANETARY MISSION ARCHIVE</span>
+          </div>
+          <h2 class="section-title">Mars Mission Explorer</h2>
+          <p class="section-subtitle">
+            Explore the Red Planet and the robotic pioneers that have transformed Mars from a distant point of light into a world mapped in extraordinary detail.
+          </p>
+        </div>
+
+        <div class="mars-mission-shell">
+          <div class="mars-hero">
+            <div class="mars-hero-visual" aria-label="Realistic view of Mars">
+              <div class="mars-atmosphere"></div>
+              <div class="mars-planet"></div>
+              <div class="mars-visual-grid"></div>
+              <div class="mars-coordinate-tag">
+                <i class="fa-solid fa-crosshairs"></i>
+                <span>23.4° N / 137.8° E</span>
+              </div>
+            </div>
+
+            <div class="mars-hero-content">
+              <div class="mars-status-row">
+                <span class="mars-status-pill"><span class="status-pulse"></span> PLANETARY DATA ONLINE</span>
+                <span class="mars-status-code">MARS // SOL 4TH PLANET</span>
+              </div>
+              <h3>THE RED PLANET</h3>
+              <p>
+                A cold desert world shaped by ancient rivers, colossal volcanoes, polar ice and dust storms. Mars is humanity's most accessible target for the next era of planetary exploration.
+              </p>
+              <div class="mars-fact-grid">
+                <article><span>Diameter</span><strong>6,779 km</strong><small>0.53 Earths</small></article>
+                <article><span>Gravity</span><strong>3.71 m/s²</strong><small>0.38 Earths</small></article>
+                <article><span>Day Length</span><strong>24h 37m</strong><small>1 Martian sol</small></article>
+                <article><span>Year Length</span><strong>687 days</strong><small>1.88 Earth years</small></article>
+                <article><span>Natural Moons</span><strong>2</strong><small>Phobos &amp; Deimos</small></article>
+              </div>
+            </div>
+          </div>
+
+          <div class="mars-rover-section">
+            <div class="mars-subheading">
+              <div>
+                <span class="mars-eyebrow">ROBOTIC FLEET</span>
+                <h3>Rover Showcase</h3>
+              </div>
+              <p>Select a mission to inspect its scientific legacy.</p>
+            </div>
+            <div class="mars-rover-grid" id="mars-rover-grid" aria-label="Mars rover missions"></div>
+          </div>
+
+          <div class="mars-timeline-section">
+            <div class="mars-subheading">
+              <div>
+                <span class="mars-eyebrow">MISSION CHRONOLOGY</span>
+                <h3>Surface Exploration Timeline</h3>
+              </div>
+            </div>
+            <div class="mars-timeline" id="mars-timeline"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 04: DEEP SPACE OBSERVATORY -->
+    <section class="section deep-space-section" id="section-deep-space">
+      <div class="app-container">
+        <div class="section-header">
+          <div class="section-tag">
+            <i class="fa-solid fa-telescope"></i>
+            <span>SECTION 04 // DEEP SPACE OBSERVATORY</span>
+          </div>
+          <h2 class="section-title">Beyond the Visible Horizon</h2>
+          <p class="section-subtitle">
+            Explore galaxies, nebulae, black holes, and the observatories revealing the universe across ultraviolet, visible, infrared, and radio light.
+          </p>
+        </div>
+
+        <div class="deep-space-grid">
+          <article class="deep-observation-card deep-observation-featured">
+            <img src="https://images-assets.nasa.gov/image/PIA12348/PIA12348~orig.jpg" alt="The Milky Way galaxy" loading="lazy">
+            <div class="deep-card-overlay">
+              <span class="deep-card-category">Galaxy Explorer</span>
+              <h3>Milky Way</h3>
+              <p>Our barred spiral galaxy contains hundreds of billions of stars, vast clouds of gas and dust, and a supermassive black hole at its center.</p>
+              <div class="deep-card-meta"><span>Type  &nbsp; BARRED SPIRAL</span><span>Diameter  &nbsp; 100,000 LY</span></div>
+            </div>
+          </article>
+
+          <article class="deep-observation-card">
+            <img src="https://images-assets.nasa.gov/image/PIA17563/PIA17563~orig.jpg" alt="Andromeda Galaxy" loading="lazy">
+            <div class="deep-card-overlay">
+              <span class="deep-card-category">Galaxy Explorer</span>
+              <h3>Andromeda</h3>
+              <p>The nearest major galaxy to the Milky Way, located about 2.5 million light-years away.</p>
+              <div class="deep-card-meta"><span>M31</span><span>2.5M LY</span></div>
+            </div>
+          </article>
+
+          <article class="deep-observation-card">
+            <img src="https://images-assets.nasa.gov/image/PIA09240/PIA09240~orig.jpg" alt="Orion Nebula" loading="lazy">
+            <div class="deep-card-overlay">
+              <span class="deep-card-category">Nebula Gallery</span>
+              <h3>Orion Nebula</h3>
+              <p>A nearby stellar nursery where young stars illuminate glowing clouds of hydrogen and cosmic dust.</p>
+              <div class="deep-card-meta"><span>M42</span><span>1,344 LY</span></div>
+            </div>
+          </article>
+
+          <article class="deep-observation-card">
+            <img src="https://images-assets.nasa.gov/image/PIA15985/PIA15985~orig.jpg" alt="Pillars of Creation" loading="lazy">
+            <div class="deep-card-overlay">
+              <span class="deep-card-category">Nebula Gallery</span>
+              <h3>Pillars of Creation</h3>
+              <p>Towering columns of interstellar gas and dust in the Eagle Nebula, shaped by intense ultraviolet radiation.</p>
+              <div class="deep-card-meta"><span>Eagle Nebula</span><span>M16</span></div>
+            </div>
+          </article>
+
+          <article class="deep-observation-card">
+            <img src="https://images-assets.nasa.gov/image/PIA23122/PIA23122~orig.jpg" alt="Black hole at the center of galaxy M87" loading="lazy">
+            <div class="deep-card-overlay">
+              <span class="deep-card-category">Black Hole Discovery</span>
+              <h3>Messier 87*</h3>
+              <p>The Event Horizon Telescope imaged the shadow of a black hole with a mass billions of times greater than our Sun.</p>
+              <div class="deep-card-meta"><span>6.5B Solar Masses</span><span>55M LY</span></div>
+            </div>
+          </article>
+
+          <article class="deep-observation-card">
+            <img src="https://images-assets.nasa.gov/image/PIA17553/PIA17553~orig.jpg" alt="Hubble Space Telescope deep space view" loading="lazy">
+            <div class="deep-card-overlay">
+              <span class="deep-card-category">Space Telescope</span>
+              <h3>Hubble</h3>
+              <p>Operating above Earth's atmosphere since 1990, Hubble has transformed visible-light astronomy and cosmology.</p>
+              <div class="deep-card-meta"><span>1990</span><span>VISIBLE + UV</span></div>
+            </div>
+          </article>
+
+          <article class="deep-observation-card">
+            <img src="https://images-assets.nasa.gov/image/PIA24964/PIA24964~orig.jpg" alt="James Webb Space Telescope deep space image" loading="lazy">
+            <div class="deep-card-overlay">
+              <span class="deep-card-category">Space Telescope</span>
+              <h3>James Webb</h3>
+              <p>Webb observes primarily in infrared to study the first galaxies, exoplanets, star formation, and distant worlds.</p>
+              <div class="deep-card-meta"><span>2021</span><span>INFRARED</span></div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 05: SPACE MISSION CONTROL -->
+    <section class="section mission-control-section" id="section-mission-control">
+      <div class="app-container">
+        <div class="section-header">
+          <div class="section-tag">
+            <i class="fa-solid fa-rocket"></i>
+            <span>SECTION 05 // MISSION ARCHIVE</span>
+          </div>
+          <h2 class="section-title">Space Mission Control</h2>
+          <p class="section-subtitle">
+            A curated archive of landmark lunar, interplanetary, and commercial crew missions. Status labels represent the static educational mission record—not live operations.
+          </p>
+        </div>
+
+        <div class="mission-control-shell">
+          <div class="mission-filter-bar" aria-label="Filter mission archive">
+            <button class="mission-filter active" data-filter="all">All Missions</button>
+            <button class="mission-filter" data-filter="completed">Completed</button>
+            <button class="mission-filter" data-filter="ongoing">Ongoing</button>
+            <button class="mission-filter" data-filter="planned">Planned</button>
+          </div>
+
+          <div class="mission-grid" id="mission-grid" aria-live="polite"></div>
+
+          <div class="mission-timeline-panel">
+            <div class="mission-panel-heading">
+              <div>
+                <span class="mission-eyebrow">FLIGHT CHRONOLOGY</span>
+                <h3>Mission Timeline</h3>
+              </div>
+              <p>Select a milestone to highlight its archive card.</p>
+            </div>
+            <div class="mission-timeline" id="mission-timeline"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 06: NASA OBSERVATIONS -->
+    <section class="section" id="section-nasa-data">
+      <div class="app-container">
+        <!-- Section Header -->
+        <div class="section-header">
+          <div class="section-tag">
+            <i class="fa-solid fa-camera-retro"></i>
+            <span>SECTION 06 // NASA OBSERVATIONS</span>
+          </div>
+          <h2 class="section-title">NASA Data Explorer</h2>
+          <p class="section-subtitle">
+            Direct integration with NASA's Astronomy Picture of the Day (APOD) API. Explore high-resolution cosmic imagery captured by Hubble, James Webb Space Telescope, and planetary exploration probes.
+          </p>
+        </div>
+
+        <div class="apod-shell">
+          <!-- Controls Bar -->
+          <div class="apod-controls-bar">
+            <div class="apod-date-picker-group">
+              <label for="apod-date-input" class="apod-date-label">
+                <i class="fa-regular fa-calendar"></i>
+                <span>Cosmic Date:</span>
+              </label>
+              <input type="date" id="apod-date-input" class="apod-date-input">
+            </div>
+
+            <div class="apod-action-buttons">
+              <button class="apod-quick-btn" id="apod-btn-today">
+                <i class="fa-solid fa-bolt"></i>
+                <span>Today</span>
+              </button>
+              <button class="apod-quick-btn" id="apod-btn-yesterday">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                <span>Yesterday</span>
+              </button>
+              <button class="apod-quick-btn" id="apod-btn-random">
+                <i class="fa-solid fa-shuffle"></i>
+                <span>Random Discovery</span>
+              </button>
+              <button class="apod-quick-btn" id="apod-btn-audio">
+                <i class="fa-solid fa-volume-high"></i>
+                <span>Listen to Briefing</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Main APOD Showcase Card -->
+          <div class="apod-main-card">
+            <!-- Left: Media Viewer -->
+            <div class="apod-media-container" id="apod-media-container">
+              <img id="apod-image" class="apod-image" src="" alt="NASA APOD">
+              <div class="apod-fullscreen-badge">
+                <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+                <span>View Full Resolution</span>
+              </div>
+            </div>
+
+            <!-- Right: Information & Science Details -->
+            <div class="apod-info-container">
+              <div>
+                <div class="apod-header-meta">
+                  <div class="apod-date-badge" id="apod-date-badge">
+                    <i class="fa-regular fa-calendar-days"></i> Loading date...
+                  </div>
+                  <div class="apod-agency-badge">NASA APOD</div>
+                </div>
+
+                <h3 class="apod-title" id="apod-title">Loading Cosmic Observation...</h3>
+
+                <div class="apod-explanation-wrapper">
+                  <p class="apod-explanation" id="apod-explanation">
+                    Fetching scientific telemetry and celestial photography from NASA Deep Space Network...
+                  </p>
+                </div>
+              </div>
+
+              <div class="apod-credit-footer">
+                <span id="apod-credit" class="apod-credit-author">Credit: NASA</span>
+                <span class="hud-pill" style="font-size: 0.72rem;">
+                  <i class="fa-solid fa-shield-halved" style="color: #10B981;"></i>
+                  <span>SECURE BACKEND PROXY</span>
+                </span>
+              </div>
+            </div>
+
+            <!-- Radar Spinner Loader Overlay -->
+            <div class="apod-loader-overlay" id="apod-loader" style="display: none;">
+              <div class="radar-spinner"></div>
+              <div class="radar-status-text" id="apod-loader-text">CONTACTING NASA DEEP SPACE NETWORK...</div>
+            </div>
+
+            <!-- Error State Overlay -->
+            <div class="apod-error-overlay" id="apod-error" style="display: none;">
+              <div class="apod-error-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+              <h4 style="font-family: var(--font-heading); color: #FFFFFF;">Telemetry Transmission Interrupted</h4>
+              <p class="apod-error-msg" id="apod-error-msg">Failed to contact NASA APOD server.</p>
+              <button class="btn btn-primary" id="apod-btn-retry">
+                <i class="fa-solid fa-rotate-right"></i>
+                <span>Retry Transmission</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Curated Archive Highlights Carousel -->
+          <div class="apod-curated-section">
+            <h4 class="curated-heading">
+              <i class="fa-solid fa-sparkles" style="color: var(--accent-purple);"></i>
+              <span>Iconic NASA Discoveries Archive</span>
+            </h4>
+            <div class="curated-cards-grid" id="apod-curated-grid">
+              <!-- Populated by nasa-apod.js -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Fullscreen HD Image Lightbox Modal for NASA APOD -->
+  <div class="apod-modal" id="apod-modal">
+    <div class="apod-modal-content">
+      <button class="apod-modal-close" id="apod-modal-close" aria-label="Close modal">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <img id="apod-modal-img" class="apod-modal-image" src="" alt="Full resolution NASA observation">
+      <div id="apod-modal-caption" class="apod-modal-caption"></div>
+    </div>
+  </div>
+
+  <!-- Global Footer -->
+  <footer class="orbitx-footer">
+    <div class="app-container">
+      <div class="footer-grid">
+        <div>
+          <a href="#hero" class="brand-logo">
+            <div class="brand-symbol">
+              <div class="brand-ring"></div>
+              <div class="brand-core"></div>
+            </div>
+            <span>ORBITX</span>
+          </a>
+          <p class="footer-desc">
+            Independent space exploration, astrophysical research, planetary visualization, and historical mission archive. Built for discovery and scientific accuracy.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="footer-heading">Platform</h4>
+          <ul class="footer-links">
+            <li><a href="#hero">Overview</a></li>
+            <li><a href="#solar-system">Solar System Explorer</a></li>
+            <li><a href="#section-planet-explorer">Planet Explorer</a></li>
+            <li><a href="#section-nasa-data">NASA APOD Archive</a></li>
+            <li><a href="#section-mars-mission">Mars Mission Explorer</a></li>
+            <li><a href="#section-deep-space">Deep Space Observatory</a></li>
+            <li><a href="#section-mission-control">Space Mission Control</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-heading">Scientific Data</h4>
+          <ul class="footer-links">
+            <li><a href="https://nssdc.gsfc.nasa.gov/planetary/factsheet/" target="_blank" rel="noopener">NASA Planetary Fact Sheets</a></li>
+            <li><a href="https://api.nasa.gov/" target="_blank" rel="noopener">NASA Open APIs</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-heading">Architecture</h4>
+          <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.6;">
+            Powered by a lightweight, secure Python backend proxy. API keys remain protected in backend environment variables.
+          </p>
+          <div style="margin-top: 1rem;">
+            <span class="hud-pill" style="display: inline-flex;">
+              <span class="hud-pill-dot"></span>
+              <span>Python 3 Standard Library</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2026 ORBITX Exploration Platform. Scientific data courtesy of NASA, ESA, and international space agencies.</p>
+        <p>Crafted for space enthusiasts, researchers, and aspiring astrophysicists.</p>
+      </div>
+    </div>
+  </footer>
+
+  <button class="orbitx-back-to-top" id="orbitx-back-to-top" type="button" aria-label="Back to top">
+    <i class="fa-solid fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <!-- Data & Application Logic Modules -->
+  <script src="js/data/planets-data.js"></script>
+  <script src="js/data/apod-curated.js"></script>
+  <script src="js/starfield.js"></script>
+  <script src="js/solar-system.js"></script>
+  <script src="js/planet-explorer.js"></script>
+  <script src="js/nasa-apod.js"></script>
+  <script src="js/mars-mission.js"></script>
+  <script src="js/mission-control.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
