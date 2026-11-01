@@ -16,8 +16,15 @@ class SolarSystemSimulator {
     this.showOrbits = true;
     this.showLabels = true;
     this.selectedPlanetId = null;
+    this.cameraMode = 'system';
     this.hoveredPlanetId = null;
     this.textureImages = {};
+    this.satelliteScreenPositions = [];
+    this.earthSatelliteModels = [
+      { id: 'iss-sim', name: 'ISS (SIM)', purpose: 'Orbital research laboratory', altitude: '420 km', inclination: '51.6 deg', phase: 0.15, radius: 1.9, color: '#38BDF8' },
+      { id: 'eo-1-sim', name: 'EO-1 (SIM)', purpose: 'Earth observation', altitude: '705 km', inclination: '98.2 deg', phase: 2.35, radius: 2.45, color: '#A78BFA' },
+      { id: 'nav-4-sim', name: 'NAV-4 (SIM)', purpose: 'Navigation constellation', altitude: '20,200 km', inclination: '55.0 deg', phase: 4.15, radius: 3.05, color: '#22D3EE' }
+    ];
 
     // Camera transform (Pan & Zoom)
     this.camera = {
@@ -28,7 +35,9 @@ class SolarSystemSimulator {
       zoom: 1.0,
       targetZoom: 1.0,
       minZoom: 0.28,
-      maxZoom: 3.5
+      maxZoom: 3.5,
+      orbitTilt: 0.62,
+      rotation: 0
     };
 
     // Drag / Pan interaction state
@@ -81,7 +90,8 @@ class SolarSystemSimulator {
         orbitDistance: 185,
         speed: 0.013,
         angle: Math.random() * Math.PI * 2,
-        realDataKey: 'mars'
+        realDataKey: 'mars',
+        moons: ['Phobos', 'Deimos']
       },
       {
         id: 'jupiter',
@@ -93,7 +103,8 @@ class SolarSystemSimulator {
         speed: 0.007,
         angle: Math.random() * Math.PI * 2,
         realDataKey: 'jupiter',
-        bands: true
+        bands: true,
+        moons: ['Io', 'Europa', 'Ganymede']
       },
       {
         id: 'saturn',
@@ -105,7 +116,8 @@ class SolarSystemSimulator {
         speed: 0.0048,
         angle: Math.random() * Math.PI * 2,
         realDataKey: 'saturn',
-        hasRings: true
+        hasRings: true,
+        moons: ['Titan']
       },
       {
         id: 'uranus',
@@ -117,7 +129,8 @@ class SolarSystemSimulator {
         speed: 0.0032,
         angle: Math.random() * Math.PI * 2,
         realDataKey: 'uranus',
-        hasRings: true
+        hasRings: true,
+        moons: ['Titania']
       },
       {
         id: 'neptune',
@@ -128,7 +141,8 @@ class SolarSystemSimulator {
         orbitDistance: 470,
         speed: 0.0022,
         angle: Math.random() * Math.PI * 2,
-        realDataKey: 'neptune'
+        realDataKey: 'neptune',
+        moons: ['Triton']
       }
     ];
 
@@ -248,6 +262,11 @@ class SolarSystemSimulator {
 
     // Click Detection on Planet or Sun
     this.canvas.addEventListener('click', (e) => {
+      const satellite = this.getSatelliteAtMouse(e);
+      if (satellite) {
+        this.showSatellitePanel(satellite);
+        return;
+      }
       const clicked = this.getPlanetAtMouse(e);
       if (clicked) {
         this.selectPlanet(clicked.id);
@@ -316,6 +335,43 @@ class SolarSystemSimulator {
       });
     }
 
+    const systemViewBtn = document.getElementById('solar-view-system');
+    const earthViewBtn = document.getElementById('solar-view-earth');
+    systemViewBtn?.addEventListener('click', () => this.setCameraMode('system'));
+    earthViewBtn?.addEventListener('click', () => this.setCameraMode('earth'));
+
+    const fullscreenBtn = document.getElementById('solar-btn-fullscreen');
+    const wrapper = document.querySelector('.solar-system-wrapper');
+    if (fullscreenBtn && wrapper) {
+      fullscreenBtn.addEventListener('click', async () => {
+        try {
+          if (!document.fullscreenElement) {
+              await wrapper.requestFullscreen();
+            } else {
+              await document.exitFullscreen();
+            }
+          } catch (error) {
+            wrapper.classList.toggle('solar-fullscreen-fallback');
+          }
+      });
+      document.addEventListener('fullscreenchange', () => {
+        const active = Boolean(document.fullscreenElement);
+        fullscreenBtn.classList.toggle('active', active);
+        fullscreenBtn.innerHTML = active
+          ? '<i class="fa-solid fa-compress"></i><span>Exit</span>'
+          : '<i class="fa-solid fa-expand"></i><span>Fullscreen</span>';
+        setTimeout(() => this.resize(), 60);
+      });
+    }
+
+    document.getElementById('solar-camera-in')?.addEventListener('click', () => this.setZoom(this.camera.targetZoom * 1.22));
+    document.getElementById('solar-camera-out')?.addEventListener('click', () => this.setZoom(this.camera.targetZoom / 1.22));
+    document.getElementById('solar-camera-left')?.addEventListener('click', () => { this.camera.rotation -= 0.18; });
+    document.getElementById('solar-camera-right')?.addEventListener('click', () => { this.camera.rotation += 0.18; });
+    document.getElementById('solar-satellite-close')?.addEventListener('click', () => {
+      document.getElementById('solar-satellite-panel')?.classList.remove('visible');
+    });
+
     // Planet Quick Select Tabs
     const tabs = document.querySelectorAll('.planet-tab-btn');
     tabs.forEach(tab => {
@@ -354,10 +410,55 @@ class SolarSystemSimulator {
     this.camera.targetX = this.width / 2;
     this.camera.targetY = this.height / 2;
     this.camera.targetZoom = this.baseZoom || 1;
+    this.camera.rotation = 0;
     this.selectedPlanetId = null;
+    this.cameraMode = 'system';
+    document.getElementById('solar-view-system')?.classList.add('active');
+    document.getElementById('solar-view-earth')?.classList.remove('active');
     this.updateActiveTab(null);
     if (this.telemetryPanelEl) this.telemetryPanelEl.style.display = 'none';
   }
+
+  setCameraMode(mode) {
+    const systemViewBtn = document.getElementById('solar-view-system');
+    const earthViewBtn = document.getElementById('solar-view-earth');
+    this.cameraMode = mode;
+    systemViewBtn?.classList.toggle('active', mode === 'system');
+    earthViewBtn?.classList.toggle('active', mode === 'earth');
+
+    if (mode === 'earth') {
+      this.selectedPlanetId = 'earth';
+      this.updateActiveTab('earth');
+      const earthData = window.PLANETS_DATA?.earth;
+      if (earthData) this.renderTelemetryPanel(earthData);
+      this.camera.targetZoom = Math.max(3.3, this.camera.minZoom);
+    } else {
+      this.selectedPlanetId = null;
+      this.updateActiveTab(null);
+      this.camera.targetX = this.width / 2;
+      this.camera.targetY = this.height / 2;
+      this.camera.targetZoom = this.baseZoom || 1;
+      if (this.telemetryPanelEl) this.telemetryPanelEl.style.display = 'none';
+    }
+  }
+
+    getOrbitPosition(planet) {
+      const angle = planet.angle + this.camera.rotation;
+      return {
+        x: this.camera.x + Math.cos(angle) * planet.orbitDistance * this.camera.zoom,
+        y: this.camera.y + Math.sin(angle) * planet.orbitDistance * this.camera.zoom * this.camera.orbitTilt
+      };
+    }
+
+    showSatellitePanel(satellite) {
+      const panel = document.getElementById('solar-satellite-panel');
+      if (!panel) return;
+      document.getElementById('solar-satellite-name').textContent = satellite.name;
+      document.getElementById('solar-satellite-purpose').textContent = satellite.purpose;
+      document.getElementById('solar-satellite-altitude').textContent = satellite.altitude;
+      document.getElementById('solar-satellite-inclination').textContent = satellite.inclination;
+      panel.classList.add('visible');
+    }
 
   getPlanetAtMouse(e) {
     const rect = this.canvas.getBoundingClientRect();
@@ -365,8 +466,9 @@ class SolarSystemSimulator {
     const mouseY = e.clientY - rect.top;
 
     for (const planet of this.planets) {
-      const px = this.camera.x + Math.cos(planet.angle) * (planet.orbitDistance * this.camera.zoom);
-      const py = this.camera.y + Math.sin(planet.angle) * (planet.orbitDistance * this.camera.zoom);
+      const position = this.getOrbitPosition(planet);
+      const px = position.x;
+      const py = position.y;
       const hitRadius = Math.max(planet.radius * this.camera.zoom + 10, 16);
 
       const dist = Math.hypot(mouseX - px, mouseY - py);
@@ -375,6 +477,15 @@ class SolarSystemSimulator {
       }
     }
     return null;
+  }
+
+  getSatelliteAtMouse(e) {
+    const rect = this.canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    return this.satelliteScreenPositions.find(satellite =>
+      Math.hypot(x - satellite.x, y - satellite.y) <= 18
+    )?.model || null;
   }
 
   handleMouseMove(e) {
@@ -482,8 +593,8 @@ class SolarSystemSimulator {
     if (this.selectedPlanetId && this.selectedPlanetId !== 'sun') {
       const selected = this.planets.find(p => p.id === this.selectedPlanetId);
       if (selected && !this.isDragging) {
-        const px = Math.cos(selected.angle) * (selected.orbitDistance * this.camera.zoom);
-        const py = Math.sin(selected.angle) * (selected.orbitDistance * this.camera.zoom);
+        const px = Math.cos(selected.angle + this.camera.rotation) * (selected.orbitDistance * this.camera.zoom);
+        const py = Math.sin(selected.angle + this.camera.rotation) * (selected.orbitDistance * this.camera.zoom * this.camera.orbitTilt);
         this.camera.targetX = (this.width / 2) - px;
         this.camera.targetY = (this.height / 2) - py;
       }
@@ -507,7 +618,11 @@ class SolarSystemSimulator {
       for (const planet of this.planets) {
         const orbitRadius = planet.orbitDistance * this.camera.zoom;
         this.ctx.beginPath();
-        this.ctx.arc(this.camera.x, this.camera.y, orbitRadius, 0, Math.PI * 2);
+        this.ctx.save();
+        this.ctx.translate(this.camera.x, this.camera.y);
+        this.ctx.scale(1, this.camera.orbitTilt);
+        this.ctx.arc(0, 0, orbitRadius, 0, Math.PI * 2);
+        this.ctx.restore();
         this.ctx.strokeStyle = (planet.id === this.selectedPlanetId || planet.id === this.hoveredPlanetId)
           ? 'rgba(56, 189, 248, 0.45)'
           : 'rgba(37, 99, 235, 0.18)';
@@ -521,7 +636,7 @@ class SolarSystemSimulator {
     // 2. Draw Asteroid Belt
     for (const asteroid of this.asteroids) {
       const ax = this.camera.x + Math.cos(asteroid.angle) * (asteroid.orbitDistance * this.camera.zoom);
-      const ay = this.camera.y + Math.sin(asteroid.angle) * (asteroid.orbitDistance * this.camera.zoom);
+      const ay = this.camera.y + Math.sin(asteroid.angle) * (asteroid.orbitDistance * this.camera.zoom * this.camera.orbitTilt);
 
       this.ctx.fillStyle = `rgba(148, 163, 184, ${asteroid.alpha})`;
       this.ctx.beginPath();
@@ -562,8 +677,9 @@ class SolarSystemSimulator {
 
     // 4. Draw Planets & Rings
     for (const planet of this.planets) {
-      const px = this.camera.x + Math.cos(planet.angle) * (planet.orbitDistance * this.camera.zoom);
-      const py = this.camera.y + Math.sin(planet.angle) * (planet.orbitDistance * this.camera.zoom);
+      const position = this.getOrbitPosition(planet);
+      const px = position.x;
+      const py = position.y;
       const pr = Math.max(planet.radius * this.camera.zoom, 4);
 
       // Selected / Hovered Highlight Reticle
@@ -641,9 +757,75 @@ class SolarSystemSimulator {
         this.ctx.beginPath();
         this.ctx.arc(mx, my, Math.max(pr * 0.28, 2), 0, Math.PI * 2);
         this.ctx.fill();
+
+        // Moon and simulated Earth-orbiting satellite labels.
+        if (this.showLabels) {
+          this.ctx.font = "500 9px 'Space Grotesk', sans-serif";
+          this.ctx.fillStyle = '#CBD5E1';
+          this.ctx.textAlign = 'center';
+          this.ctx.fillText('Moon', mx, my + 10);
+        }
+
+        this.satelliteScreenPositions = [];
+        for (const satellite of this.earthSatelliteModels) {
+          const phase = satellite.phase + planet.angle * (satellite.id === 'iss-sim' ? 5.4 : satellite.id === 'eo-1-sim' ? 3.7 : 2.8);
+          const orbitRadius = pr * satellite.radius;
+          this.ctx.save();
+          this.ctx.translate(px, py);
+          this.ctx.rotate(this.camera.rotation * 0.45);
+          this.ctx.beginPath();
+          this.ctx.ellipse(0, 0, orbitRadius, orbitRadius * (0.32 + satellite.radius * 0.025), 0, 0, Math.PI * 2);
+          this.ctx.strokeStyle = `${satellite.color}55`;
+          this.ctx.lineWidth = 1;
+          this.ctx.setLineDash([3, 4]);
+          this.ctx.stroke();
+          this.ctx.setLineDash([]);
+          this.ctx.restore();
+
+          const sx = px + Math.cos(phase) * orbitRadius;
+          const sy = py + Math.sin(phase) * orbitRadius * (0.32 + satellite.radius * 0.025);
+          this.satelliteScreenPositions.push({ x: sx, y: sy, model: satellite });
+          this.ctx.save();
+          this.ctx.shadowColor = satellite.color;
+          this.ctx.shadowBlur = 10;
+          this.ctx.translate(sx, sy);
+          this.ctx.rotate(phase + 0.4);
+          this.ctx.fillStyle = satellite.color;
+          this.ctx.fillRect(-3, -2, 6, 4);
+          this.ctx.fillStyle = '#93C5FD';
+          this.ctx.fillRect(-9, -2, 5, 4);
+          this.ctx.fillRect(4, -2, 5, 4);
+          this.ctx.strokeStyle = satellite.color;
+          this.ctx.restore();
+          if (this.showLabels && (this.cameraMode === 'earth' || this.camera.zoom > 1.25)) {
+            this.ctx.font = "600 8px 'JetBrains Mono', monospace";
+            this.ctx.fillStyle = satellite.color;
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText(satellite.name, sx, sy - 7);
+          }
+        }
       }
 
       // Planet Label
+      if (planet.moons) {
+        planet.moons.forEach((moonName, index) => {
+          const moonAngle = planet.angle * (7 + index * 1.3) + index * 1.9;
+          const moonDistance = pr * (2.1 + index * 0.48);
+          const mx = px + Math.cos(moonAngle) * moonDistance;
+          const my = py + Math.sin(moonAngle) * moonDistance * 0.55;
+          this.ctx.fillStyle = '#CBD5E1';
+          this.ctx.beginPath();
+          this.ctx.arc(mx, my, Math.max(pr * 0.18, 1.5), 0, Math.PI * 2);
+          this.ctx.fill();
+          if (this.showLabels && this.camera.zoom > 1.1) {
+            this.ctx.font = "500 8px 'JetBrains Mono', monospace";
+            this.ctx.fillStyle = '#CBD5E1';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText(moonName, mx, my - 5);
+          }
+        });
+      }
+
       if (this.showLabels) {
         this.ctx.font = `500 ${Math.max(10 * this.camera.zoom, 9)}px 'Space Grotesk', sans-serif`;
         this.ctx.fillStyle = (planet.id === this.selectedPlanetId) ? '#38BDF8' : '#F5F7FF';

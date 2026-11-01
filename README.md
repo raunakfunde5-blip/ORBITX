@@ -18,6 +18,8 @@ ORBITX is a space exploration and astrophysical research web platform built with
 
 ### 1. 🪐 Solar System Explorer
 * **Planetary Mechanics:** Interactive simulation of the Sun, all eight major planets (Mercury, Venus, Earth with Moon, Mars, Jupiter, Saturn with rings, Uranus, Neptune), and the main asteroid belt.
+* **Complete Scene & Camera Modes:** Opens on a complete-system overview and includes a focused Earth satellite camera mode with simulated ISS, observation, and navigation objects.
+* **Integrated Satellite Labels:** Earth satellites and the Moon are clearly labeled within the Solar System scene; simulated satellite motion is not presented as live tracking.
 * **Kinematics Engine:** Scaled orbital velocities governed by Keplerian proportional motion.
 * **Interactive Controls:**
   * Play / Pause orbital motion.
@@ -59,6 +61,25 @@ ORBITX is a space exploration and astrophysical research web platform built with
   * Solar State: Indicates whether the station is in direct sunlight or eclipsed in Earth's shadow.
   * Expedition Crew: Live roster of astronauts currently aboard the ISS.
 * **Reliability & Offline Fallback:** When internet or live satellite APIs are unreachable, the system automatically activates a mathematical orbital propagation model (~51.64° inclination, 92.9 min period) and clearly flags **"OFFLINE / SIMULATION MODE"**.
+
+### 5. 🚀 NASA Mission & Spacecraft Explorer
+* **Interactive Mission Archive:** Explore Voyager 1, Voyager 2, JWST, Hubble, Perseverance, and Curiosity from the Mission Control dashboard.
+* **Educational Models:** Lightweight canvas reconstruction of spacecraft and mission trajectories, with selectable craft and camera rotation, zoom, and reset controls.
+* **Curated Mission Facts:** Launch, destination, status, and objective information is maintained as conservative static archive data.
+* **Simulation Transparency:** Models and paths are explicitly identified as educational simulations rather than live telemetry.
+* **Provider-Ready Architecture:** The spacecraft controller accepts normalized mission records for future NASA-backed data providers without exposing API credentials.
+
+### 6. 🌍 Earth & Planet Observation System
+* **Enhanced Earth Globe:** Continents, cloud bands, atmospheric glow, day/night shading, and a simulated Moon orbit are integrated into Satellite Explorer.
+* **Location Observation Dashboard:** Select Tokyo, Nairobi, New York, Sydney, London, or Cape Town to inspect coordinates and simulated sunrise/sunset values.
+* **Planetary Observation:** The existing Planet Explorer provides scientific facts for all eight planets and the Sun, including moons, atmospheres, physical properties, and comparison tools.
+* **Data Transparency:** Location conditions, Earth lighting, Moon motion, and orbital objects are clearly identified as simulations until verified live providers are added.
+
+### 7. 🚀 3D Space Travel Simulator
+* **Educational Flight:** Pilot a lightweight Canvas spacecraft toward Earth, Moon, Mars, Jupiter, or Saturn.
+* **Flight Controls:** Accelerate, brake, rotate, pause, reset, change external/cockpit camera, and follow journey progress.
+* **Scaled Journey Data:** Distances and durations are compressed and clearly labeled as educational simulations.
+* **Performance:** No 3D library dependency; stars, asteroid fields, destination lighting, and engine effects use a responsive canvas renderer.
 
 ---
 

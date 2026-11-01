@@ -168,11 +168,70 @@ class OrbitxApp {
     // Instantiate Solar System Simulator
     const solarCanvas = document.getElementById('solar-system-canvas');
     if (solarCanvas) {
-      this.solarSimulator = new SolarSystemSimulator('solar-system-canvas');
+      if (typeof window.SolarSystemSimulator === 'function') {
+        this.solarSimulator = new window.SolarSystemSimulator('solar-system-canvas');
+      }
+    }
+    const satelliteCanvas = document.getElementById('satellite-globe-canvas');
+    if (satelliteCanvas && window.SatelliteExplorer) {
+      this.satelliteExplorer = new window.SatelliteExplorer('satellite-globe-canvas');
+    }
+    const deepSection = document.getElementById('section-deep-space');
+    const deepCanvas = document.getElementById('deep-space-canvas');
+    if (deepSection && deepCanvas && 'IntersectionObserver' in window && window.DeepSpaceExplorer) {
+      const observer = new IntersectionObserver(entries => {
+        if (!entries.some(entry => entry.isIntersecting)) return;
+        if (!this.deepSpaceExplorer && typeof window.DeepSpaceExplorer === 'function') {
+          this.deepSpaceExplorer = new window.DeepSpaceExplorer('deep-space-canvas');
+        }
+        observer.disconnect();
+      }, { rootMargin: '300px' });
+      observer.observe(deepSection);
+    } else if (deepCanvas && typeof window.DeepSpaceExplorer === 'function') {
+      this.deepSpaceExplorer = new window.DeepSpaceExplorer('deep-space-canvas');
+    }
+    const spacecraftCanvas = document.getElementById('spacecraft-stage-canvas');
+    const missionSection = document.getElementById('section-mission-control');
+    if (spacecraftCanvas && missionSection && window.SpacecraftExplorer) {
+      const startExplorer = () => {
+        if (!this.spacecraftExplorer && typeof window.SpacecraftExplorer === 'function') {
+          this.spacecraftExplorer = new window.SpacecraftExplorer('spacecraft-stage-canvas');
+        }
+      };
+      if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver(entries => {
+          if (!entries.some(entry => entry.isIntersecting)) return;
+          startExplorer();
+          observer.disconnect();
+        }, { rootMargin: '300px' });
+        observer.observe(missionSection);
+      } else {
+        startExplorer();
+      }
+    }
+    const travelCanvas = document.getElementById('space-travel-canvas');
+    const travelSection = document.getElementById('section-space-travel');
+    if (travelCanvas && travelSection && window.SpaceTravelSimulator) {
+      if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver(entries => {
+          if (!entries.some(entry => entry.isIntersecting)) return;
+          this.spaceTravelSimulator = new window.SpaceTravelSimulator('space-travel-canvas');
+          observer.disconnect();
+        }, { rootMargin: '300px' });
+        observer.observe(travelSection);
+      } else {
+        this.spaceTravelSimulator = new window.SpaceTravelSimulator('space-travel-canvas');
+      }
+    }
+    if (document.getElementById('mission-command-center') && window.MissionCommandCenter) {
+      this.missionCommandCenter = new window.MissionCommandCenter('command-earth-canvas');
     }
   }
 
   openPlanetInExplorer(planetId) {
+    document.dispatchEvent(new CustomEvent('orbitx-object-selected', {
+      detail: { objectId: planetId }
+    }));
     const planetExplorerSec = document.getElementById('section-planet-explorer');
     if (planetExplorerSec) {
       planetExplorerSec.scrollIntoView({ behavior: 'smooth', block: 'start' });

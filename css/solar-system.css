@@ -33,6 +33,63 @@
   flex-wrap: wrap;
 }
 
+.solar-camera-modes {
+  display: flex;
+  gap: 0.35rem;
+  padding: 0.25rem;
+  border: 1px solid rgba(56, 189, 248, 0.12);
+  border-radius: var(--radius-full);
+  background: rgba(7, 11, 24, 0.48);
+}
+
+.solar-zoom-controls,
+.solar-rotate-controls {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.control-icon-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  background: rgba(56, 189, 248, 0.08);
+  color: var(--accent-cyan);
+  cursor: pointer;
+}
+
+.control-icon-btn:hover {
+  background: rgba(56, 189, 248, 0.18);
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.16);
+}
+
+.solar-satellite-panel {
+  position: absolute;
+  left: 1.5rem;
+  bottom: 1.5rem;
+  width: 300px;
+  max-width: calc(100% - 3rem);
+  display: none;
+  z-index: 12;
+  padding: 1rem;
+  border: 1px solid rgba(56, 189, 248, 0.24);
+  border-radius: var(--radius-md);
+  background: rgba(7, 11, 24, 0.92);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.55);
+}
+
+.solar-satellite-panel.visible { display: block; }
+.solar-satellite-panel-title { display: flex; justify-content: space-between; align-items: center; color: #FCD34D; font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.08em; }
+.solar-satellite-panel-title button { border: 0; background: transparent; color: var(--text-muted); cursor: pointer; }
+.solar-satellite-panel h3 { margin: 0.7rem 0 0.2rem; }
+.solar-satellite-panel p { margin: 0; color: var(--text-muted); font-size: 0.82rem; }
+.solar-satellite-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-top: 0.85rem; }
+.solar-satellite-stats div { padding: 0.55rem; border-radius: var(--radius-sm); background: rgba(255,255,255,.035); }
+.solar-satellite-stats span, .solar-satellite-stats strong { display: block; }
+.solar-satellite-stats span { color: var(--text-muted); font-size: 0.62rem; }
+.solar-satellite-stats strong { margin-top: 0.2rem; color: var(--accent-cyan); font-family: var(--font-mono); font-size: 0.68rem; }
+
 .control-pill-btn {
   display: inline-flex;
   align-items: center;

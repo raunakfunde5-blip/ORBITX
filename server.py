@@ -31,6 +31,8 @@ import sys
 import time
 import time
 import ssl
+import traceback
+from datetime import datetime, timedelta, timezone
 
 # ----------------------------------------------------------------------------
 # 1. Configuration & Security
@@ -58,9 +60,13 @@ def load_env_file(filepath=".env"):
 # Load .env file (if present), or fall back to system environment variables
 file_env = load_env_file(".env")
 NASA_API_KEY = os.environ.get("NASA_API_KEY") or file_env.get("NASA_API_KEY") or "DEMO_KEY"
+AI_API_KEY = os.environ.get("ORBITX_AI_API_KEY") or file_env.get("ORBITX_AI_API_KEY") or ""
+AI_API_URL = os.environ.get("ORBITX_AI_API_URL") or file_env.get("ORBITX_AI_API_URL") or ""
+AI_MODEL = os.environ.get("ORBITX_AI_MODEL") or file_env.get("ORBITX_AI_MODEL") or "gpt-4o-mini"
 
 # In-memory cache for APOD requests to avoid repeating calls to NASA
 APOD_CACHE = {}
+NASA_DATA_CACHE = {}
 
 print("=" * 65)
 print("ORBITX SPACE EXPLORATION PLATFORM - BACKEND INITIALIZED")
@@ -106,6 +112,28 @@ class OrbitxRequestHandler(http.server.SimpleHTTPRequestHandler):
     ISS_CACHE = {"data": None, "timestamp": 0}
     CREW_CACHE = {"data": None, "timestamp": 0}
 
+    def do_POST(self):
+        print(f"[AI POST] {self.path}")
+        parsed_url = urllib.parse.urlparse(self.path)
+        if parsed_url.path != "/api/ai/chat":
+            self.send_json_response({"error": "Unknown API endpoint."}, status_code=404)
+            return
+        try:
+            length = min(int(self.headers.get("Content-Length", "0")), 50000)
+            payload = json.loads(self.rfile.read(length).decode("utf-8"))
+            message = str(payload.get("message", "")).strip()
+            if not message or len(message) > 2000:
+                self.send_json_response({"error": "Message must contain between 1 and 2000 characters."}, status_code=400)
+                return
+            history = payload.get("history", [])
+            context = payload.get("context", {})
+            self.handle_ai_chat(message, history if isinstance(history, list) else [], context if isinstance(context, dict) else {})
+        except (ValueError, json.JSONDecodeError):
+            self.send_json_response({"error": "Invalid JSON request body."}, status_code=400)
+        except Exception as ex:
+            print(f"[AI Chat Request Warning] {ex}")
+            self.send_json_response({"error": "The assistant could not complete this request. Local demo mode remains available."}, status_code=502)
+
     def do_OPTIONS(self):
         """Handle CORS preflight requests."""
         self.send_response(200)
@@ -127,6 +155,12 @@ class OrbitxRequestHandler(http.server.SimpleHTTPRequestHandler):
         # --------------------------------------------------------------------
         if path == "/api/nasa/apod":
             self.handle_nasa_apod(query_params)
+            return
+        if path == "/api/nasa/mars-photos":
+            self.handle_nasa_mars_photos()
+            return
+        if path == "/api/nasa/space-weather":
+            self.handle_nasa_space_weather()
             return
 
         # --------------------------------------------------------------------
@@ -151,7 +185,9 @@ class OrbitxRequestHandler(http.server.SimpleHTTPRequestHandler):
                 "status": "online",
                 "platform": "ORBITX Space Exploration Backend",
                 "version": "1.0.0",
-                "nasa_key_configured": NASA_API_KEY != "DEMO_KEY"
+                "nasa_key_configured": NASA_API_KEY != "DEMO_KEY",
+                "ai_mode": "provider" if AI_API_KEY and AI_API_URL else "local-demo",
+                "ai_provider_configured": bool(AI_API_KEY and AI_API_URL)
             })
             return
 
@@ -243,6 +279,181 @@ class OrbitxRequestHandler(http.server.SimpleHTTPRequestHandler):
                 "error": "Failed to reach NASA API. Please verify network connection.",
                 "details": str(ex)
             }, status_code=502)
+
+    # ------------------------------------------------------------------------
+    # Handler: NASA Mars Rover Photos
+    # ------------------------------------------------------------------------
+    def handle_nasa_mars_photos(self):
+        cache_key = "mars-photos"
+        cached = NASA_DATA_CACHE.get(cache_key)
+        if cached and (time.time() - cached["fetched_at"]) < 900:
+            self.send_json_response({**cached["data"], "cache": "CACHED"})
+            return
+        try:
+            url = (
+                "https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/latest_photos"
+                f"?api_key={urllib.parse.quote(NASA_API_KEY)}&page=1"
+            )
+            with open_url_resilient(url, timeout=10) as response:
+                raw = json.loads(response.read().decode("utf-8"))
+            photos = [{
+                "id": photo.get("id"),
+                "earth_date": photo.get("earth_date"),
+                "sol": photo.get("sol"),
+                "camera": photo.get("camera", {}).get("full_name"),
+                "image_url": photo.get("img_src"),
+                "rover": photo.get("rover", {}).get("name"),
+                "status": photo.get("rover", {}).get("status")
+            } for photo in raw.get("latest_photos", [])[:12]]
+            result = {
+                "photos": photos,
+                "source": "NASA Mars Rover Photos API",
+                "attribution": "NASA/JPL-Caltech",
+                "retrieved_at": datetime.now(timezone.utc).isoformat(),
+                "cache": "LIVE"
+            }
+            NASA_DATA_CACHE[cache_key] = {"data": result, "fetched_at": time.time()}
+            self.send_json_response(result)
+        except Exception as ex:
+            print(f"[NASA Mars Photos Warning] {ex}")
+            self.send_json_response({
+                "photos": [], "source": "NASA Mars Rover Photos API",
+                "attribution": "NASA/JPL-Caltech",
+                "error": "Mars rover imagery is temporarily unavailable.",
+                "cache": "UNAVAILABLE",
+                "retrieved_at": datetime.now(timezone.utc).isoformat()
+            }, status_code=200)
+
+    # ------------------------------------------------------------------------
+    # Handler: NASA DONKI Space Weather
+    # ------------------------------------------------------------------------
+    def handle_nasa_space_weather(self):
+        cache_key = "space-weather"
+        cached = NASA_DATA_CACHE.get(cache_key)
+        if cached and (time.time() - cached["fetched_at"]) < 900:
+            self.send_json_response({**cached["data"], "cache": "CACHED"})
+            return
+        today = datetime.now(timezone.utc).date()
+        start_date = (today - timedelta(days=7)).isoformat()
+        end_date = today.isoformat()
+        params = f"api_key={urllib.parse.quote(NASA_API_KEY)}&startDate={start_date}&endDate={end_date}"
+        try:
+            with open_url_resilient(f"https://api.nasa.gov/DONKI/FLR?{params}", timeout=10) as response:
+                flare_records = json.loads(response.read().decode("utf-8"))
+            with open_url_resilient(f"https://api.nasa.gov/DONKI/GST?{params}", timeout=10) as response:
+                storm_records = json.loads(response.read().decode("utf-8"))
+            flares = [{
+                "begin_time": record.get("beginTime"),
+                "class_type": record.get("classType"),
+                "source_location": record.get("sourceLocation"),
+                "active_region": record.get("activeRegionNum")
+            } for record in sorted(flare_records, key=lambda item: item.get("beginTime", ""), reverse=True)[:6]]
+            storms = []
+            for record in sorted(storm_records, key=lambda item: item.get("startTime", ""), reverse=True)[:4]:
+                observations = record.get("allKpIndex", [])
+                storms.append({
+                    "start_time": record.get("startTime"),
+                    "kp_index": max((item.get("kpIndex", 0) for item in observations), default=None),
+                    "observed_time": observations[-1].get("observedTime") if observations else None
+                })
+            result = {
+                "flares": flares, "geomagnetic_storms": storms,
+                "window": {"start": start_date, "end": end_date},
+                "source": "NASA DONKI",
+                "attribution": "NASA Space Weather Database of Notifications, Knowledge, Information",
+                "retrieved_at": datetime.now(timezone.utc).isoformat(),
+                "cache": "LIVE"
+            }
+            NASA_DATA_CACHE[cache_key] = {"data": result, "fetched_at": time.time()}
+            self.send_json_response(result)
+        except Exception as ex:
+            print(f"[NASA Space Weather Warning] {ex}")
+            self.send_json_response({
+                "flares": [], "geomagnetic_storms": [],
+                "window": {"start": start_date, "end": end_date},
+                "source": "NASA DONKI",
+                "error": "Space-weather telemetry is temporarily unavailable.",
+                "cache": "UNAVAILABLE",
+                "retrieved_at": datetime.now(timezone.utc).isoformat()
+            }, status_code=200)
+
+    def handle_ai_chat(self, message, history, context):
+        object_name = str(context.get("objectName", "")).strip()
+        system_prompt = (
+            "You are ORBITX Guide, an educational space assistant. "
+            "Use verified scientific information and say when facts are uncertain. "
+            "Never present ORBITX simulations, orbital positions, or travel estimates as observed reality. "
+            "Keep answers concise, useful, and accurate."
+        )
+        if object_name:
+            system_prompt += f" The user is currently exploring {object_name}. {context.get('objectSummary', '')}"
+
+        if AI_API_KEY and AI_API_URL:
+            try:
+                messages = [{"role": "system", "content": system_prompt}]
+                for item in history[-8:]:
+                    if isinstance(item, dict) and item.get("role") in ("user", "assistant"):
+                        messages.append({
+                            "role": item["role"],
+                            "content": str(item.get("content", ""))[:4000]
+                        })
+                messages.append({"role": "user", "content": message})
+                request = urllib.request.Request(
+                    AI_API_URL,
+                    data=json.dumps({"model": AI_MODEL, "messages": messages, "temperature": 0.2}).encode("utf-8"),
+                    headers={"Authorization": "Bearer " + AI_API_KEY, "Content-Type": "application/json"},
+                    method="POST"
+                )
+                with open_url_resilient(request, timeout=20) as response:
+                    provider = json.loads(response.read().decode("utf-8"))
+                answer = provider.get("choices", [{}])[0].get("message", {}).get("content", "")
+                if not answer:
+                    raise ValueError("AI provider returned no answer.")
+                self.send_json_response({"answer": answer.strip(), "mode": "AI_PROVIDER", "provider": "Configured OpenAI-compatible endpoint"})
+                return
+            except Exception as ex:
+                print(f"[ORBITX AI Provider Warning] {ex}")
+
+        question = message.lower()
+        if object_name:
+            object_summary = context.get("objectSummary", "")
+            answer = (
+                f"{object_name} is the ORBITX object currently in context. "
+                f"{object_summary}" if object_summary else
+                f"{object_name} is the selected ORBITX space object. I can provide general information about it, "
+                "but detailed facts should be confirmed with NASA or ESA."
+            )
+            if any(term in question for term in ("moons", "moon", "satellite")):
+                answer += f" For {object_name}'s moon and satellite details, ORBITX Planet Explorer and Satellite Explorer use separate educational datasets."
+        elif any(term in question for term in ("earth", "our planet")):
+            answer = "Earth is the third planet from the Sun and the only world known to host life. Its average diameter is about 12,742 km, and its day lasts approximately 23 hours and 56 minutes."
+        elif "mars" in question:
+            answer = "Mars is the fourth planet from the Sun. It has a thin carbon-dioxide atmosphere, polar ice, and evidence of ancient water. Its day is about 24.6 hours, while its year lasts about 687 Earth days."
+        elif "jupiter" in question:
+            answer = "Jupiter is the fifth planet from the Sun and the Solar System's largest planet. It is a gas giant with a strong magnetic field and many moons; its Great Red Spot is a long-lived atmospheric storm."
+        elif "saturn" in question:
+            answer = "Saturn is the sixth planet from the Sun and is known for its extensive ring system. It is a gas giant, and its rings are made primarily of many pieces of ice and rock with some dust."
+        elif "moon" in question:
+            answer = "The Moon is Earth's natural satellite. It is about 3,474 km in diameter and affects Earth's tides through its gravity. Its synchronous rotation means the same lunar hemisphere usually faces Earth."
+        elif "satellite" in question:
+            answer = "A satellite is an object that orbits a planet or other body. Natural satellites include moons; artificial satellites support communications, navigation, Earth observation, and science. The satellite positions shown in ORBITX are simulations unless the interface explicitly labels verified live telemetry."
+        elif "galaxy" in question:
+            answer = "A galaxy is a gravitationally bound system of stars, gas, dust, dark matter, and stellar remnants. The Milky Way is a barred spiral galaxy containing our Solar System."
+        elif "black hole" in question:
+            answer = "A black hole is a region where gravity is so strong that light cannot escape. Its boundary is called the event horizon. Nearby material can form a hot accretion disk, while visualizations such as those in ORBITX are scientific illustrations rather than photographs unless identified."
+        elif any(term in question for term in ("mission", "voyager", "james webb", "hubble")):
+            answer = "ORBITX Mission Control includes educational mission records for spacecraft such as Voyager 1, Voyager 2, JWST, Hubble, Perseverance, and Curiosity. Mission schedules and trajectories shown in ORBITX should be treated as curated or simulated unless a verified source and timestamp are displayed."
+        else:
+            answer = (
+                "I can explain planets, moons, stars, galaxies, black holes, satellites, spacecraft, and ORBITX missions. "
+                "Select an object in the exploration panels or ask about a specific planet. "
+                "This response is from ORBITX Local Knowledge Mode, not a live scientific data feed."
+            )
+        self.send_json_response({
+            "answer": answer,
+            "mode": "LOCAL_DEMO",
+            "provider": "Verified ORBITX local knowledge"
+        })
 
     # ------------------------------------------------------------------------
     # Handler: ISS Live Telemetry
@@ -359,6 +570,9 @@ def run_server():
     class ThreadingServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
         daemon_threads = True
         allow_reuse_address = True
+
+        def handle_error(self, request, client_address):
+            traceback.print_exception(*sys.exc_info())
 
     with ThreadingServer(("", PORT), OrbitxRequestHandler) as httpd:
         print("Server active. Press Ctrl+C in your terminal to stop.")

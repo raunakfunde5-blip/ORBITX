@@ -15,11 +15,17 @@
   <!-- Core Design System & Component Styles -->
   <link rel="stylesheet" href="css/orbitx-theme.css">
   <link rel="stylesheet" href="css/solar-system.css">
+  <link rel="stylesheet" href="css/satellite-explorer.css">
   <link rel="stylesheet" href="css/planet-explorer.css">
   <link rel="stylesheet" href="css/nasa-apod.css">
   <link rel="stylesheet" href="css/mars-mission.css">
   <link rel="stylesheet" href="css/deep-space.css">
+  <link rel="stylesheet" href="css/deep-space-explorer.css">
   <link rel="stylesheet" href="css/mission-control.css">
+  <link rel="stylesheet" href="css/spacecraft-explorer.css">
+  <link rel="stylesheet" href="css/space-travel.css">
+  <link rel="stylesheet" href="css/mission-command.css">
+  <link rel="stylesheet" href="css/space-assistant.css">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -49,9 +55,11 @@
         <li><a href="#hero" class="nav-link active">Overview</a></li>
         <li><a href="#solar-system" class="nav-link">Solar System</a></li>
         <li><a href="#section-planet-explorer" class="nav-link">Planet Explorer</a></li>
+        <li><a href="#section-satellite-explorer" class="nav-link">Satellites</a></li>
         <li><a href="#section-mars-mission" class="nav-link">Mars Mission</a></li>
         <li><a href="#section-deep-space" class="nav-link">Deep Space</a></li>
         <li><a href="#section-mission-control" class="nav-link">Mission Control</a></li>
+        <li><a href="#section-space-travel" class="nav-link">Space Travel</a></li>
         <li><a href="#section-nasa-data" class="nav-link">NASA APOD</a></li>
       </ul>
 
@@ -173,10 +181,30 @@
                 <i class="fa-solid fa-arrows-to-circle"></i>
                 <span>Reset View</span>
               </button>
+
+              <button class="control-pill-btn" id="solar-btn-fullscreen" type="button">
+                <i class="fa-solid fa-expand"></i>
+                <span>Fullscreen</span>
+              </button>
+
+              <div class="solar-zoom-controls" aria-label="Camera zoom controls">
+                <button class="control-icon-btn" id="solar-camera-out" type="button" aria-label="Zoom out"><i class="fa-solid fa-minus"></i></button>
+                <button class="control-icon-btn" id="solar-camera-in" type="button" aria-label="Zoom in"><i class="fa-solid fa-plus"></i></button>
+              </div>
             </div>
 
             <!-- Right Controls: Orbits, Labels -->
             <div class="controls-group-right">
+              <div class="solar-camera-modes" aria-label="Solar camera mode">
+                <button class="control-pill-btn active" id="solar-view-system" type="button">
+                  <i class="fa-solid fa-solar-panel"></i>
+                  <span>Full System</span>
+                </button>
+                <button class="control-pill-btn" id="solar-view-earth" type="button">
+                  <i class="fa-solid fa-earth-americas"></i>
+                  <span>Earth Satellites</span>
+                </button>
+              </div>
               <button class="control-pill-btn active" id="solar-btn-orbits">
                 <i class="fa-solid fa-circle-notch"></i>
                 <span>Orbits</span>
@@ -186,6 +214,11 @@
                 <i class="fa-solid fa-tags"></i>
                 <span>Labels</span>
               </button>
+
+              <div class="solar-rotate-controls" aria-label="Camera rotation controls">
+                <button class="control-icon-btn" id="solar-camera-left" type="button" aria-label="Rotate camera left"><i class="fa-solid fa-rotate-left"></i></button>
+                <button class="control-icon-btn" id="solar-camera-right" type="button" aria-label="Rotate camera right"><i class="fa-solid fa-rotate-right"></i></button>
+              </div>
             </div>
           </div>
 
@@ -252,6 +285,20 @@
                   <i class="fa-solid fa-xmark"></i>
                 </button>
               </div>
+
+              <aside id="solar-satellite-panel" class="solar-satellite-panel" aria-live="polite">
+                <div class="solar-satellite-panel-title">
+                  <span><i class="fa-solid fa-satellite"></i> SIMULATED OBJECT</span>
+                  <button id="solar-satellite-close" type="button" aria-label="Close satellite information"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <h3 id="solar-satellite-name">Satellite</h3>
+                <p id="solar-satellite-purpose">Orbital object simulation</p>
+                <div class="solar-satellite-stats">
+                  <div><span>Altitude</span><strong id="solar-satellite-altitude">420 km</strong></div>
+                  <div><span>Inclination</span><strong id="solar-satellite-inclination">51.6 deg</strong></div>
+                  <div><span>Data Mode</span><strong>SIMULATED</strong></div>
+                </div>
+              </aside>
 
               <p id="solar-telemetry-tagline" class="telemetry-tagline">Scientific planetary overview</p>
 
@@ -434,7 +481,71 @@
       </div>
     </section>
 
-    <!-- SECTION 03: MARS MISSION EXPLORER -->
+    <!-- SECTION 03: SATELLITE EXPLORER -->
+    <section class="section satellite-section" id="section-satellite-explorer">
+      <div class="app-container">
+        <div class="section-header">
+          <div class="section-tag">
+            <i class="fa-solid fa-satellite"></i>
+            <span>SECTION 03 // ORBITAL OBJECTS</span>
+          </div>
+          <h2 class="section-title">Satellite Explorer</h2>
+          <p class="section-subtitle">
+            Explore a cinematic Earth globe and simulated orbital paths. This visualization is clearly simulated and ready for a future live telemetry provider.
+          </p>
+        </div>
+
+        <div class="satellite-dashboard">
+          <div class="satellite-stage">
+            <canvas id="satellite-globe-canvas" aria-label="Animated Earth globe with simulated satellites"></canvas>
+            <div class="simulation-watermark">
+              <span class="simulation-dot"></span>
+              SIMULATED ORBITAL POSITIONS
+            </div>
+            <div class="satellite-instructions">Drag to rotate • Wheel or pinch to zoom</div>
+          </div>
+
+          <aside class="satellite-panel">
+            <div class="satellite-panel-header">
+              <div>
+                <span class="telemetry-eyebrow">TRACKING NETWORK</span>
+                <h3>Orbital Objects</h3>
+              </div>
+              <button id="satellite-play" class="satellite-icon-btn active" type="button" aria-label="Pause satellites">
+                <i class="fa-solid fa-pause"></i>
+              </button>
+            </div>
+            <div class="satellite-status-grid">
+              <div><span>Mode</span><strong>SIMULATION</strong></div>
+              <div><span>Objects</span><strong id="satellite-count">4</strong></div>
+            </div>
+            <div id="satellite-object-list" class="satellite-object-list"></div>
+            <div class="earth-location-panel">
+              <div class="earth-location-heading">
+                <span>OBSERVATION LOCATIONS</span>
+                <small>EDUCATIONAL / SIMULATED</small>
+              </div>
+              <div id="earth-location-list" class="earth-location-list"></div>
+              <div class="earth-location-readout">
+                <strong id="earth-location-name">Tokyo, Japan</strong>
+                <span id="earth-location-coordinates">35.6762° N / 139.6503° E</span>
+                <div>
+                  <p><span>Sunrise</span><strong id="earth-sunrise">05:42 JST</strong></p>
+                  <p><span>Sunset</span><strong id="earth-sunset">17:58 JST</strong></p>
+                </div>
+                <small id="earth-location-note">Illustrative local time values. Not live astronomical forecasts.</small>
+              </div>
+            </div>
+            <div class="satellite-data-note">
+              <i class="fa-solid fa-code"></i>
+              <p>Provider-ready telemetry adapter included for future live satellite tracking data.</p>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 04: MARS MISSION EXPLORER -->
     <section class="section mars-section" id="section-mars-mission">
       <div class="app-container">
         <div class="section-header">
@@ -515,6 +626,37 @@
           <p class="section-subtitle">
             Explore galaxies, nebulae, black holes, and the observatories revealing the universe across ultraviolet, visible, infrared, and radio light.
           </p>
+        </div>
+
+        <div class="deep-explorer-shell">
+          <div class="deep-explorer-toolbar">
+            <div class="deep-mode-buttons" aria-label="Exploration modes">
+              <button class="deep-mode-button active" type="button" data-explorer-mode="galaxy"><i class="fa-solid fa-sparkles"></i> Galaxy Exploration</button>
+              <button class="deep-mode-button" type="button" data-explorer-mode="solar"><i class="fa-solid fa-solar-panel"></i> Solar System</button>
+              <button class="deep-mode-button" type="button" data-explorer-mode="earth"><i class="fa-solid fa-earth-americas"></i> Earth Satellites</button>
+            </div>
+            <div class="deep-camera-buttons">
+              <button id="deep-camera-out" type="button" aria-label="Zoom out"><i class="fa-solid fa-minus"></i></button>
+              <button id="deep-camera-in" type="button" aria-label="Zoom in"><i class="fa-solid fa-plus"></i></button>
+              <button id="deep-camera-left" type="button" aria-label="Rotate left"><i class="fa-solid fa-rotate-left"></i></button>
+              <button id="deep-camera-right" type="button" aria-label="Rotate right"><i class="fa-solid fa-rotate-right"></i></button>
+              <button id="deep-camera-reset" type="button" aria-label="Reset galaxy view"><i class="fa-solid fa-arrows-to-circle"></i></button>
+            </div>
+          </div>
+          <div class="deep-explorer-stage">
+            <canvas id="deep-space-canvas" aria-label="Interactive simulated deep-space galaxy"></canvas>
+            <div class="deep-explorer-badge"><span></span> EDUCATIONAL 3D SIMULATION</div>
+            <aside id="deep-object-panel" class="deep-object-panel">
+              <span class="deep-object-type" id="deep-object-type">DEEP SPACE OBJECT</span>
+              <h3 id="deep-object-name">Select an object</h3>
+              <p id="deep-object-description">Explore the galaxy to inspect simulated cosmic objects.</p>
+              <div class="deep-object-facts">
+                <div><span>Distance</span><strong id="deep-object-distance">--</strong></div>
+                <div><span>Approx. size</span><strong id="deep-object-size">--</strong></div>
+              </div>
+              <small>Educational visualization; positions and scale are simulated.</small>
+            </aside>
+          </div>
         </div>
 
         <div class="deep-space-grid">
@@ -606,6 +748,101 @@
         </div>
 
         <div class="mission-control-shell">
+          <div class="mission-command-center" id="mission-command-center">
+            <header class="command-center-header">
+              <div><span class="command-eyebrow">ORBITX COMMAND NETWORK</span><strong>MISSION CONTROL CENTER</strong></div>
+              <div class="command-status">
+                <span><i></i> SYSTEMS NOMINAL</span>
+                <strong>SIMULATION DATA</strong>
+                <button id="command-fullscreen" type="button" aria-label="Open command center fullscreen"><i class="fa-solid fa-expand"></i></button>
+              </div>
+            </header>
+            <div class="command-center-grid">
+              <nav class="command-sidebar" aria-label="Mission control navigation">
+                <button class="active" type="button" data-command-view="overview"><i class="fa-solid fa-grid-2"></i><span>Overview</span></button>
+                <button type="button" data-command-view="solar"><i class="fa-solid fa-sun"></i><span>Solar System</span></button>
+                <button type="button" data-command-view="satellites"><i class="fa-solid fa-satellite"></i><span>Earth Orbit</span></button>
+                <button type="button" data-command-view="missions"><i class="fa-solid fa-rocket"></i><span>Missions</span></button>
+              </nav>
+              <div class="command-main">
+                <div class="command-loading" id="command-loading"><span></span> INITIALIZING SIMULATED TELEMETRY</div>
+                <div class="command-earth-stage" id="command-earth-stage">
+                  <canvas id="command-earth-canvas" aria-label="Interactive simulated Earth and satellite command map"></canvas>
+                  <div class="command-map-label"><i></i> EARTH ORBIT / SIMULATED</div>
+                </div>
+                <div class="command-panel-grid">
+                  <article>
+                    <span>PLANETARY POSITIONS</span>
+                    <strong id="command-planet-count">8 planets</strong>
+                    <small>Educational simulation</small>
+                  </article>
+                  <article>
+                    <span>ORBITAL OBJECTS</span>
+                    <strong id="command-satellite-count">04 active</strong>
+                    <small>Simulated positions</small>
+                  </article>
+                  <article>
+                    <span>MISSION ARCHIVE</span>
+                    <strong>6 records</strong>
+                    <small>Curated static data</small>
+                  </article>
+                  <article>
+                    <span>ENVIRONMENT</span>
+                    <strong>NOMINAL</strong>
+                    <small>Dashboard indicator</small>
+                  </article>
+                </div>
+              </div>
+              <aside class="command-inspector">
+                <div>
+                  <span class="command-panel-title" id="command-inspector-eyebrow">GLOBAL OVERVIEW</span>
+                  <h3 id="command-inspector-title">Earth Observation</h3>
+                  <p id="command-inspector-text">Select an orbital object to inspect its simulated mission profile.</p>
+                </div>
+                <div id="command-satellite-selector" class="command-satellite-selector"></div>
+                <dl class="command-data-list">
+                  <div><dt>Orbit</dt><dd id="command-object-orbit">LEO</dd></div>
+                  <div><dt>Inclination</dt><dd id="command-object-inclination">51.6°</dd></div>
+                  <div><dt>Period</dt><dd id="command-object-period">92.9 min</dd></div>
+                  <div><dt>Data mode</dt><dd>SIMULATED</dd></div>
+                </dl>
+                <button id="command-earth-reset" type="button">Reset Earth View</button>
+              </aside>
+            </div>
+          </div>
+
+          <div class="spacecraft-explorer-shell">
+            <div class="spacecraft-stage">
+              <canvas id="spacecraft-stage-canvas" aria-label="Interactive spacecraft and simulated mission trajectory explorer"></canvas>
+              <div class="spacecraft-stage-label"><span></span> TRAJECTORIES SIMULATED</div>
+              <div class="spacecraft-camera-controls" aria-label="Spacecraft camera controls">
+                <button id="spacecraft-zoom-out" type="button" aria-label="Zoom out"><i class="fa-solid fa-minus"></i></button>
+                <button id="spacecraft-zoom-in" type="button" aria-label="Zoom in"><i class="fa-solid fa-plus"></i></button>
+                <button id="spacecraft-rotate-left" type="button" aria-label="Rotate left"><i class="fa-solid fa-rotate-left"></i></button>
+                <button id="spacecraft-rotate-right" type="button" aria-label="Rotate right"><i class="fa-solid fa-rotate-right"></i></button>
+                <button id="spacecraft-reset" type="button" aria-label="Reset view"><i class="fa-solid fa-arrows-to-circle"></i></button>
+              </div>
+            </div>
+            <aside class="spacecraft-panel">
+              <div class="spacecraft-panel-heading">
+                <span>MISSION ARCHIVE</span>
+                <strong id="spacecraft-source-label">CURATED NASA RECORDS</strong>
+              </div>
+              <div id="spacecraft-selector" class="spacecraft-selector" aria-label="Select spacecraft"></div>
+              <div class="spacecraft-info">
+                <span class="spacecraft-category" id="spacecraft-category">INTERPLANETARY PROBE</span>
+                <h3 id="spacecraft-name">Voyager 1</h3>
+                <p id="spacecraft-description"></p>
+                <div class="spacecraft-facts">
+                  <div><span>Launch</span><strong id="spacecraft-launch">5 Sep 1977</strong></div>
+                  <div><span>Destination</span><strong id="spacecraft-destination">Interstellar space</strong></div>
+                  <div><span>Status</span><strong id="spacecraft-status">Ongoing</strong></div>
+                </div>
+                <small>Educational reconstruction and simulated mission path. No live telemetry is displayed.</small>
+              </div>
+            </aside>
+          </div>
+
           <div class="mission-filter-bar" aria-label="Filter mission archive">
             <button class="mission-filter active" data-filter="all">All Missions</button>
             <button class="mission-filter" data-filter="completed">Completed</button>
@@ -629,19 +866,132 @@
       </div>
     </section>
 
-    <!-- SECTION 06: NASA OBSERVATIONS -->
+    <!-- SECTION 06: SPACE TRAVEL SIMULATOR -->
+    <section class="section space-travel-section" id="section-space-travel">
+      <div class="app-container">
+        <div class="section-header">
+          <div class="section-tag">
+            <i class="fa-solid fa-shuttle-space"></i>
+            <span>SECTION 06 // EDUCATIONAL FLIGHT SIMULATION</span>
+          </div>
+          <h2 class="section-title">3D Space Travel Simulator</h2>
+          <p class="section-subtitle">
+            Pilot a simulated spacecraft through an educational deep-space flight display. Distances and durations are visually scaled—not physically calculated mission plans.
+          </p>
+        </div>
+
+        <div class="space-travel-shell">
+          <div class="space-travel-stage">
+            <canvas id="space-travel-canvas" aria-label="Interactive 3D space travel simulator"></canvas>
+            <div class="travel-watermark"><span></span> EDUCATIONAL TRAJECTORY</div>
+            <div class="travel-hud travel-hud-left">
+              <span>VELOCITY</span>
+              <strong id="travel-speed">0.00 c</strong>
+              <small>SIMULATED</small>
+            </div>
+            <div class="travel-hud travel-hud-right">
+              <span>HEADING</span>
+              <strong id="travel-heading">000° / 000°</strong>
+              <small id="travel-flight-status">STANDBY</small>
+            </div>
+            <div class="travel-progress">
+              <div><span id="travel-progress-name">Mars</span><strong id="travel-progress-value">0%</strong></div>
+              <div class="travel-progress-track"><span id="travel-progress-bar"></span></div>
+            </div>
+            <div class="travel-mobile-controls">
+              <button type="button" data-travel-control="left" aria-label="Rotate left"><i class="fa-solid fa-arrow-left"></i></button>
+              <button type="button" data-travel-control="accelerate" aria-label="Accelerate"><i class="fa-solid fa-gauge-high"></i></button>
+              <button type="button" data-travel-control="brake" aria-label="Decelerate"><i class="fa-solid fa-gauge-simple"></i></button>
+              <button type="button" data-travel-control="right" aria-label="Rotate right"><i class="fa-solid fa-arrow-right"></i></button>
+            </div>
+          </div>
+
+          <aside class="travel-control-panel">
+            <div class="travel-panel-heading">
+              <div><span>FLIGHT CONTROL</span><h3 id="travel-destination">Mars</h3></div>
+              <button id="travel-pause" type="button" aria-label="Pause journey"><i class="fa-solid fa-pause"></i></button>
+            </div>
+
+            <label class="travel-field-label" for="travel-destination-select">Destination</label>
+            <select id="travel-destination-select" class="travel-select">
+              <option value="earth">Earth — 12,742 km diameter</option>
+              <option value="moon">Moon — 384,400 km from Earth</option>
+              <option value="mars" selected>Mars — 225 million km average</option>
+              <option value="jupiter">Jupiter — 778 million km average</option>
+              <option value="saturn">Saturn — 1.43 billion km average</option>
+            </select>
+
+            <div class="travel-distance-grid">
+              <div><span>Reference Distance</span><strong id="travel-distance">225M km</strong></div>
+              <div><span>Scaled Duration</span><strong id="travel-duration">2 min</strong></div>
+            </div>
+
+            <div class="travel-flight-buttons">
+              <button id="travel-brake" type="button"><i class="fa-solid fa-minus"></i> Brake</button>
+              <button id="travel-accelerate" class="primary" type="button"><i class="fa-solid fa-plus"></i> Accelerate</button>
+            </div>
+            <div class="travel-camera-buttons">
+              <button id="travel-camera-external" class="active" type="button">External</button>
+              <button id="travel-camera-cockpit" type="button">Cockpit</button>
+              <button id="travel-reset" type="button">Reset Journey</button>
+            </div>
+
+            <div class="travel-education">
+              <i class="fa-solid fa-graduation-cap"></i>
+              <p><strong>Educational mode</strong> Motion, distance compression, speed, and arrival timing are intentionally simulated. Real interplanetary trajectories depend on launch windows, propulsion, gravity assists, and orbital mechanics.</p>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 07: NASA OBSERVATIONS -->
     <section class="section" id="section-nasa-data">
       <div class="app-container">
         <!-- Section Header -->
         <div class="section-header">
           <div class="section-tag">
             <i class="fa-solid fa-camera-retro"></i>
-            <span>SECTION 06 // NASA OBSERVATIONS</span>
+            <span>SECTION 07 // NASA OBSERVATIONS</span>
           </div>
           <h2 class="section-title">NASA Data Explorer</h2>
           <p class="section-subtitle">
             Direct integration with NASA's Astronomy Picture of the Day (APOD) API. Explore high-resolution cosmic imagery captured by Hubble, James Webb Space Telescope, and planetary exploration probes.
           </p>
+        </div>
+
+        <div class="live-data-panel">
+          <div class="live-data-heading">
+            <div>
+              <span class="live-data-kicker">VERIFIED PROVIDERS</span>
+              <h3>Live Space Data Network</h3>
+            </div>
+            <button type="button" id="live-data-refresh" class="apod-quick-btn">
+              <i class="fa-solid fa-rotate"></i><span>Refresh data</span>
+            </button>
+          </div>
+          <div class="live-data-status-row">
+            <span id="live-data-mars-status" class="data-source-status">MARS: CHECKING</span>
+            <span id="live-data-weather-status" class="data-source-status">SPACE WEATHER: CHECKING</span>
+            <span id="live-data-iss-status" class="data-source-status">ISS: CHECKING</span>
+          </div>
+          <div class="live-data-grid">
+            <article class="live-data-card">
+              <div class="live-data-card-title"><i class="fa-solid fa-camera"></i><span>Curiosity Latest Imagery</span></div>
+              <div id="live-mars-gallery" class="live-mars-gallery" aria-live="polite">Loading verified NASA imagery...</div>
+              <small id="live-mars-meta" class="live-data-meta"></small>
+            </article>
+            <article class="live-data-card">
+              <div class="live-data-card-title"><i class="fa-solid fa-sun"></i><span>Solar Activity (7 Days)</span></div>
+              <div id="live-weather-summary" class="live-weather-summary" aria-live="polite">Loading NASA DONKI telemetry...</div>
+              <small id="live-weather-meta" class="live-data-meta"></small>
+            </article>
+            <article class="live-data-card">
+              <div class="live-data-card-title"><i class="fa-solid fa-satellite"></i><span>ISS Position</span></div>
+              <div id="live-iss-summary" class="live-iss-summary" aria-live="polite">Loading satellite telemetry...</div>
+              <small id="live-iss-meta" class="live-data-meta"></small>
+            </article>
+          </div>
         </div>
 
         <div class="apod-shell">
@@ -782,6 +1132,7 @@
             <li><a href="#hero">Overview</a></li>
             <li><a href="#solar-system">Solar System Explorer</a></li>
             <li><a href="#section-planet-explorer">Planet Explorer</a></li>
+            <li><a href="#section-satellite-explorer">Satellite Explorer</a></li>
             <li><a href="#section-nasa-data">NASA APOD Archive</a></li>
             <li><a href="#section-mars-mission">Mars Mission Explorer</a></li>
             <li><a href="#section-deep-space">Deep Space Observatory</a></li>
@@ -822,15 +1173,71 @@
     <i class="fa-solid fa-arrow-up" aria-hidden="true"></i>
   </button>
 
+  <button class="orbitx-ai-launcher" id="orbitx-ai-launcher" type="button" aria-controls="orbitx-ai-panel" aria-expanded="false">
+    <span class="orbitx-ai-launcher-icon"><i class="fa-solid fa-sparkles"></i></span>
+    <span>Ask ORBITX AI</span>
+    <span class="orbitx-ai-live-dot" aria-hidden="true"></span>
+  </button>
+
+  <aside class="orbitx-ai-panel" id="orbitx-ai-panel" aria-label="ORBITX AI Space Assistant" aria-hidden="true">
+    <header class="orbitx-ai-header">
+      <div class="orbitx-ai-identity">
+        <div class="orbitx-ai-avatar"><i class="fa-solid fa-atom"></i></div>
+        <div><span>ORBITX GUIDE</span><strong>AI Space Assistant</strong></div>
+      </div>
+      <button id="orbitx-ai-close" type="button" aria-label="Close assistant"><i class="fa-solid fa-xmark"></i></button>
+    </header>
+    <div class="orbitx-ai-context" id="orbitx-ai-context">
+      <span>EXPLORATION CONTEXT</span>
+      <select id="orbitx-ai-object" aria-label="Select an exploration object">
+        <option value="">General space knowledge</option>
+        <option value="sun">The Sun</option>
+        <option value="mercury">Mercury</option>
+        <option value="venus">Venus</option>
+        <option value="earth">Earth</option>
+        <option value="mars">Mars</option>
+        <option value="jupiter">Jupiter</option>
+        <option value="saturn">Saturn</option>
+        <option value="uranus">Uranus</option>
+        <option value="neptune">Neptune</option>
+      </select>
+    </div>
+    <div class="orbitx-ai-messages" id="orbitx-ai-messages" role="log" aria-live="polite">
+      <div class="orbitx-ai-message assistant">
+        <div class="orbitx-ai-bubble">Welcome aboard. Ask me about planets, moons, missions, satellites, or objects in the ORBITX explorer.</div>
+        <span class="orbitx-ai-source" id="orbitx-ai-source">LOCAL DEMO MODE</span>
+      </div>
+    </div>
+    <div class="orbitx-ai-prompts" aria-label="Suggested questions">
+      <button type="button" data-ai-prompt="How does this object compare with Earth?">Compare with Earth</button>
+      <button type="button" data-ai-prompt="What are the most interesting facts about this object?">Key facts</button>
+      <button type="button" data-ai-prompt="Which space missions studied this object?">Missions</button>
+    </div>
+    <form class="orbitx-ai-composer" id="orbitx-ai-form">
+      <label class="sr-only" for="orbitx-ai-input">Ask ORBITX</label>
+      <textarea id="orbitx-ai-input" rows="1" maxlength="2000" placeholder="Ask about space..."></textarea>
+      <button id="orbitx-ai-send" type="submit" aria-label="Send question"><i class="fa-solid fa-paper-plane"></i></button>
+    </form>
+    <div class="orbitx-ai-disclaimer"><i class="fa-solid fa-shield-halved"></i> Educational responses. Simulation and live-data labels remain authoritative.</div>
+  </aside>
+
   <!-- Data & Application Logic Modules -->
+  <script src="js/orbitx-performance.js"></script>
   <script src="js/data/planets-data.js"></script>
   <script src="js/data/apod-curated.js"></script>
   <script src="js/starfield.js"></script>
   <script src="js/solar-system.js"></script>
+  <script src="js/satellite-explorer.js"></script>
+  <script src="js/deep-space-explorer.js"></script>
   <script src="js/planet-explorer.js"></script>
   <script src="js/nasa-apod.js"></script>
+  <script src="js/space-data-dashboard.js"></script>
   <script src="js/mars-mission.js"></script>
   <script src="js/mission-control.js"></script>
+  <script src="js/spacecraft-explorer.js"></script>
+  <script src="js/space-travel.js"></script>
+  <script src="js/mission-command.js"></script>
+  <script src="js/space-assistant.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
